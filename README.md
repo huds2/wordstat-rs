@@ -21,22 +21,23 @@ let report_id = create_report(&client, &request).await.unwrap();
 ```
 Getting the list of all available reports and their statuses:
 ```rust
-let report_list = get_report_list(&client).awai.unwrap()t;
+let report_list = get_report_list(&client).await.unwrap();
 ```
 Get the generated report:
 ```rust
-let report = get_reports(&client, report_id).await.unwrap();
+let report = get_report(&client, report_id).await.unwrap();
 ```
 Delete the reports (you can have more than 5 reports on your account simultaneously):
 ```rust
 delete_report(&client, report_id).await.unwrap();
 ```
 
-Stuff to do:
+## Stuff to do:
+
 - [X] Creating reports
 - [X] Deleting reports
 - [X] Getting reports
 - [X] Getting reports list
 - [X] Getting regions list
-- [ ] Cover the methods with tests
+- [X] Cover the methods with tests
 - [ ] Documentation

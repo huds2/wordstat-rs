@@ -1,7 +1,5 @@
 use serde_json::Value;
 use crate::{WordstatError, check_status};
-use mockall_double::double;
-#[double] // For mocking the client in unit tests
 use crate::client::Client;
 
 pub struct ReportRequest {
@@ -46,5 +44,3 @@ pub async fn create_report(client: &Client, request: &ReportRequest) -> Result<i
 
     Ok(report_id.as_i64().unwrap() as i64)
 }
-
-// TODO write unit tests

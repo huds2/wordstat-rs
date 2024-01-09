@@ -14,6 +14,7 @@ pub enum StatusCode {
 }
 
 #[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct ReportStatus {
     pub report_id: i64,
     pub status: StatusCode
@@ -26,6 +27,7 @@ pub async fn get_report_list(client: &Client) -> Result<Vec<ReportStatus>, Words
     check_status(&result)?;
 
     let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse) };
+    println!("{}", data);
     let Value::Array(reports) = data else { return Err(WordstatError::BadResponse) };
 
     parse_reports(&reports)
@@ -60,4 +62,88 @@ fn parse_report(report: &Value) -> Result<ReportStatus, WordstatError> {
     })
 }
 
-// TODO write unit tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_report() {
+        let data = r#"
+                {"ReportID":54312,"StatusReport":"Done"}
+            "#;
+        let input: Value = serde_json::from_str(data).unwrap();
+
+
+        let received = super::parse_report(&input).unwrap();
+
+
+        let expected = ReportStatus {
+            report_id: 54312,
+            status: StatusCode::Done
+        };
+        assert_eq!(received, expected)
+    }
+
+    #[test]
+    #[should_panic]
+    fn parse_invalid_report() {
+        let data = r#"
+                {"Report":54312,"StatusReport":"Done"}
+            "#;
+        let input: Value = serde_json::from_str(data).unwrap();
+
+
+        let received = super::parse_report(&input).unwrap();
+
+
+        let expected = ReportStatus {
+            report_id: 54312,
+            status: StatusCode::Done
+        };
+        assert_eq!(received, expected)
+    }
+
+    #[test]
+    fn get_reposts_list() {
+        let data = r#"
+                {"data" : 
+                [
+                    {"ReportID":54312,"StatusReport":"Done"},
+                    {"ReportID":542,"StatusReport":"Pending"},
+                    {"ReportID":5423,"StatusReport":"Failed"},
+                    {"ReportID":5424,"StatusReport":"what"}
+                ]}
+            "#;
+        let return_value = serde_json::from_str(data).unwrap();
+
+        let mut mock_client = Client::default();
+        mock_client.expect_post()
+            .withf(|method, _params| method == "GetWordstatReportList")
+            .return_once(move |_method, _params| Ok(return_value));
+
+
+        let received = futures::executor::block_on(super::get_report_list(&mock_client)).unwrap();
+
+
+        let expected = vec![
+            ReportStatus {
+                report_id: 54312,
+                status: StatusCode::Done,
+            },
+            ReportStatus {
+                report_id: 542,
+                status: StatusCode::Pending,
+            },
+            ReportStatus {
+                report_id: 5423,
+                status: StatusCode::Failed,
+            },
+            ReportStatus {
+                report_id: 5424,
+                status: StatusCode::Unknown,
+            },
+        ];
+
+        assert_eq!(received, expected)
+    }
+}

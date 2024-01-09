@@ -1,7 +1,5 @@
 use serde_json::Value;
 use crate::{WordstatError, check_status};
-use mockall_double::double;
-#[double] // For mocking the client in unit tests
 use crate::client::Client;
 
 pub async fn delete_report(client: &Client, report_id: i64) -> Result<(), WordstatError> {
