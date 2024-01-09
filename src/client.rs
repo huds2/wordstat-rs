@@ -39,7 +39,7 @@ impl Client {
             .send()
             .await.unwrap();
         if response.status() != StatusCode::OK {
-            return Err(WordstatError::UnknownResponseCode { code: response.status() });
+            return Err(WordstatError::UnknownResponseCode { code: response.status().as_u16() as i64 });
         }
 
         let Ok(response_text) = response.text().await else { return Err(WordstatError::UnknownError) };

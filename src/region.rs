@@ -1,5 +1,5 @@
 use serde_json::Value;
-use crate::WordstatError;
+use crate::{WordstatError, check_status};
 use mockall_double::double;
 #[double] // For mocking the client in unit tests
 use crate::client::Client;
@@ -15,6 +15,8 @@ pub struct Region {
 pub async fn get_regions(client: &Client) -> Result<Vec<Region>, WordstatError> {
     let method = "GetRegions";
     let result = client.post(method, None).await?;
+
+    check_status(&result)?;
 
     let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse) };
     let Value::Array(regions) = data else { return Err(WordstatError::BadResponse) };
