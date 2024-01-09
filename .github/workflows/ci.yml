@@ -1,0 +1,33 @@
+name: Push to wordstat-rs repository
+run-name: Running pipeline for commit ${{ github.sha}}
+on: [push]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable, nightly]
+
+    steps:
+    - uses: hecrj/setup-rust-action@v2
+      with:
+        rust-version: ${{ matrix.rust }}
+    - uses: actions/checkout@v4
+    - name: Build library
+      run: cargo build --verbose
+  tests:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable, nightly]
+
+    steps:
+    - uses: hecrj/setup-rust-action@v2
+      with:
+        rust-version: ${{ matrix.rust }}
+    - uses: actions/checkout@v4
+    - name: Run tests
+      run: cargo test
