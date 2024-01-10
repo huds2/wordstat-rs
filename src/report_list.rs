@@ -27,7 +27,6 @@ pub async fn get_report_list(client: &Client) -> Result<Vec<ReportStatus>, Words
     check_status(&result)?;
 
     let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse) };
-    println!("{}", data);
     let Value::Array(reports) = data else { return Err(WordstatError::BadResponse) };
 
     parse_reports(&reports)
