@@ -1,11 +1,16 @@
 pub mod region;
-pub use region::{Region, get_regions};
 pub mod client;
-pub use client::Client;
 pub mod create_report;
 pub mod report_list;
 pub mod get_report;
 pub mod delete_report;
+
+pub use client::Client;
+pub use create_report::{ReportRequest, create_report};
+pub use delete_report::delete_report;
+pub use get_report::{ReportEntry, WordstatItem, get_report};
+pub use region::{Region, get_regions};
+pub use report_list::{ReportStatus, StatusCode, get_report_list};
 
 use custom_error::custom_error;
 use serde_json::Value;

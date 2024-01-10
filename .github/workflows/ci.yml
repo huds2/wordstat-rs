@@ -1,5 +1,5 @@
 name: Push to wordstat-rs repository
-run-name: Running pipeline for commit ${{ github.sha}}
+run-name: Pipeline for branch ${{ github.base_ref }}
 on: [push]
 jobs:
   build:
