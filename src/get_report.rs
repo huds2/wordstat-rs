@@ -27,7 +27,6 @@ pub async fn get_report(client: &Client, report_id: i64) -> Result<Vec<ReportEnt
 
     check_status(&result)?;
 
-
     let Some(data_val) = result.get("data") else { return Err(WordstatError::BadResponse) };
     let Value::Array(data) = data_val else { return Err(WordstatError::BadResponse) };
 
@@ -56,9 +55,14 @@ fn parse_report_entry(data: &Value) -> Result<ReportEntry, WordstatError> {
     let Value::Array(searched_with_arr) = searched_with_val else { return Err(WordstatError::BadResponse) };
     let searched_with = parse_wordstat_items(searched_with_arr)?;
 
-    let Some(searched_also_val) = data.get("SearchedAlso") else { return Err(WordstatError::BadResponse) };
-    let Value::Array(searched_also_arr) = searched_also_val else { return Err(WordstatError::BadResponse) };
-    let searched_also = parse_wordstat_items(searched_also_arr)?;
+    let searched_also: Vec<WordstatItem>;
+    if let Some(searched_also_val) = data.get("SearchedAlso") {
+        let Value::Array(searched_also_arr) = searched_also_val else { return Err(WordstatError::BadResponse) };
+        searched_also = parse_wordstat_items(searched_also_arr)?;
+    }
+    else {
+        searched_also = vec![];
+    }
 
     Ok(ReportEntry {
         phrase: phrase.to_string(),
