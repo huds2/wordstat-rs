@@ -2,6 +2,13 @@
 name = "wordstat-rs"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/huds2/wordstat-rs"
+license = "MIT"
+keywords= ["api", "yandex_direct", "wordstat", "trends", "search"]
+categories = ["parsing", "api-bindings"]
+description = "A library that allows easy interactions with Yandex Direct API for getting statistics about keyword searches from Wordstat service"
+documentation = "https://docs.rs/wordstat-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
