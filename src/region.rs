@@ -5,13 +5,18 @@ use mockall_double::double;
 use crate::client::Client;
 
 
+/// Struct describing a region
 #[derive(Debug, PartialEq, Eq)]
 pub struct Region {
+    /// The name of the region
     pub name: String,
+    /// The id of the region
     pub id: i64,
+    /// Id of the parent region, if exists
     pub parent_id: Option<i64>,
 }
 
+/// Sends a request to the API asking for a list of regions
 pub async fn get_regions(client: &Client) -> Result<Vec<Region>, WordstatError> {
     let method = "GetRegions";
     let result = client.post(method, None).await?;

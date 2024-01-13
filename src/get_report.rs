@@ -4,22 +4,31 @@ use mockall_double::double;
 #[double] // For mocking the client in unit tests
 use crate::client::Client;
 
+/// Describes a single keyword
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct WordstatItem {
+    /// The exact phrase searched
     pub phrase: String,
+    /// The amount of searches in the last month
     pub shows: i64
 }
 
+/// Describes a report about a single keyword
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReportEntry {
+    /// The phrase, used to generate the ReportEntry
     pub phrase: String,
+    /// The ID of regions included in the stats
     pub geo_id: Vec<i64>,
+    /// The phrases containing the passed phrase
     pub searched_with: Vec<WordstatItem>,
+    /// Similar phrases
     pub searched_also: Vec<WordstatItem>
 }
 
+/// Send a request to the API asking for a report with the passed ID
 pub async fn get_report(client: &Client, report_id: i64) -> Result<Vec<ReportEntry>, WordstatError> {
     let method = "GetWordstatReport";
     let params = Value::Number(report_id.into());

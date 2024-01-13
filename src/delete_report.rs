@@ -2,6 +2,8 @@ use serde_json::Value;
 use crate::{WordstatError, check_status};
 use crate::client::Client;
 
+/// Sends the request to the API using Wordstat client to delete the report with
+/// the passed report_id.
 pub async fn delete_report(client: &Client, report_id: i64) -> Result<(), WordstatError> {
     let method = "DeleteWordstatReport";
     let params = Value::Number(report_id.into());

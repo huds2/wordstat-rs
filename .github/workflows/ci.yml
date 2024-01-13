@@ -1,5 +1,4 @@
 name: Push to wordstat-rs repository
-run-name: Pipeline for branch ${{ github.head_ref }}
 on: [push]
 jobs:
   build:
@@ -38,3 +37,22 @@ jobs:
       run: cargo build --tests
     - name: Run tests
       run: cargo test
+
+  docs:
+    needs: [build, tests]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable]
+
+    steps:
+    - name: Setup rust
+      uses: hecrj/setup-rust-action@v2
+      with:
+        rust-version: ${{ matrix.rust }}
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+    - name: Build docs
+      run: cargo doc
+

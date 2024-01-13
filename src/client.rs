@@ -2,6 +2,8 @@ use reqwest::StatusCode;
 use serde_json::Value;
 use crate::WordstatError;
 
+/// Yandex Direct API client
+/// Stores the token and API URL
 pub struct Client {
     token: String,
     api_url: String,
@@ -10,6 +12,16 @@ pub struct Client {
 
 #[cfg_attr(test, mockall::automock)]
 impl Client {
+    /// Creates a new Yandex Direct API client
+    /// ```
+    /// # use wordstat_rs::*;
+    /// let client = Client::new("token", "api_url");
+    /// ```
+    ///
+    /// API version 4 should be used
+    /// The API URL is <https://api.direct.yandex.ru/v4/json/>.
+    /// If your token is for the API sandbox you should use <https://api-sandbox.direct.yandex.ru/v4/json/>
+    /// as the URL.
     pub fn new(token: &str, api_url: &str) -> Self {
         Client { 
             token: token.to_string(),
@@ -18,14 +30,17 @@ impl Client {
         }
     }
 
+    /// Assigns the passed value as the client's token.
     pub fn set_token(&mut self, token: &str) {
         self.token = token.to_string();
     }
 
+    /// Assigns the passed value as the client's API URL.
     pub fn set_url(&mut self, api_url: &str) {
         self.api_url = api_url.to_string();
     }
 
+    #[doc(hidden)]
     pub async fn post(&self, method: &str, params: Option<Value>) -> Result<serde_json::Value, WordstatError> {
         let mut payload = serde_json::Map::new();
         payload.insert("method".to_string(), Value::from(method));

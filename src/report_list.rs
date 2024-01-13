@@ -5,6 +5,7 @@ use mockall_double::double;
 use crate::client::Client;
 
 
+/// Possible states of the report
 #[derive(Debug, PartialEq)]
 pub enum StatusCode {
     Done,
@@ -13,13 +14,17 @@ pub enum StatusCode {
     Unknown
 }
 
+/// Struct describing the status of the report
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReportStatus {
+    /// The id of the report
     pub report_id: i64,
+    /// Current status of the report
     pub status: StatusCode
 }
 
+/// Sends a request to the API asking for a list of reports
 pub async fn get_report_list(client: &Client) -> Result<Vec<ReportStatus>, WordstatError> {
     let method = "GetWordstatReportList";
     let result = client.post(method, None).await?;
