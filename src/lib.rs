@@ -17,6 +17,7 @@ use serde_json::Value;
 
 custom_error!{pub WordstatError
     BadResponse{reason: &'static str}               = "Response had bad structure",
+    BadKeyphrase{reason: &'static str}              = "Bad keyphrase supplied",
     UnknownResponseCode{code:i64}                   = "Unknown response code recieved: {code}",
     UnknownError                                    = "Unknown error has occured",
     ReportDoesNotExist                              = "The specified report does not exist",        // code 24, 91
@@ -33,7 +34,7 @@ custom_error!{pub WordstatError
 
 fn check_status(response: &Value) -> Result<(), WordstatError> {
     let Some(error_code_val) = response.get("error_code") else { return Ok(()) };
-    let Some(error_code) = error_code_val.as_i64() else { return Err(WordstatError::BadResponse{ reason: "No error code returned" } ) };
+    let Some(error_code) = error_code_val.as_i64() else { return Err(WordstatError::BadResponse{ reason: "Error code is not an integer" } ) };
 
     match error_code {
         24 | 91     => { Err(WordstatError::ReportDoesNotExist) }

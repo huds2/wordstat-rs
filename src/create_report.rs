@@ -11,13 +11,15 @@ impl ReportRequest {
     pub fn new() -> Self {
         ReportRequest { phrases: vec![], geo_id: vec![] }
     }
-    pub fn add_phrase(mut self, phrase: &str) -> Self {
-        self.phrases.push(phrase.to_string());
-        self
+    pub fn add_phrase(mut self, phrase: &str) -> Result<Self, WordstatError> {
+        self.phrases.push(ReportRequest::check_phrase(phrase)?.to_string());
+        Ok(self)
     }
-    pub fn with_phrases(mut self, phrases: &Vec<&str>) -> Self {
-        self.phrases = phrases.iter().map(|s| s.to_string()).collect();
-        self
+    pub fn with_phrases(mut self, phrases: &Vec<&str>) -> Result<Self, WordstatError> {
+        for phrase in phrases {
+            self = self.add_phrase(&phrase)?;
+        }
+        Ok(self)
     }
     pub fn add_geo(mut self, geo_id: i64) -> Self {
         self.geo_id.push(geo_id);
@@ -26,6 +28,24 @@ impl ReportRequest {
     pub fn with_geo(mut self, geo_ids: &Vec<i64>) -> Self {
         self.geo_id = geo_ids.clone();
         self
+    }
+    fn check_phrase(phrase: &str) -> Result<&str, WordstatError> {
+        if phrase.contains("&") {
+            return Err(WordstatError::BadKeyphrase { reason: "Cant use '&' in keyphrases" })
+        }
+        if phrase.contains("%") {
+            return Err(WordstatError::BadKeyphrase { reason: "Cant use '%' in keyphrases" })
+        }
+        if phrase.contains("+") {
+            return Err(WordstatError::BadKeyphrase { reason: "Cant use '+' in keyphrases" })
+        }
+        if phrase.contains(" - ") {
+            return Err(WordstatError::BadKeyphrase { reason: "Cant use ' - ' in keyphrases" })
+        }
+        if phrase.contains(":") {
+            return Err(WordstatError::BadKeyphrase { reason: "Cant use ':' in keyphrases" })
+        }
+        Ok(phrase)
     }
 }
 
