@@ -44,7 +44,7 @@ impl Client {
 
         let Ok(response_text) = response.text().await else { return Err(WordstatError::UnknownError) };
         let Ok(response_json): Result<Value, serde_json::Error> = 
-                               serde_json::from_str(&response_text) else { return Err(WordstatError::BadResponse) };
+                               serde_json::from_str(&response_text) else { return Err(WordstatError::BadResponse{ reason: "Failed to read JSON response" }) };
 
         Ok(response_json)
     }

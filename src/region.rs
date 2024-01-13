@@ -18,8 +18,8 @@ pub async fn get_regions(client: &Client) -> Result<Vec<Region>, WordstatError> 
 
     check_status(&result)?;
 
-    let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse) };
-    let Value::Array(regions) = data else { return Err(WordstatError::BadResponse) };
+    let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse{ reason: "No data field in response" }) };
+    let Value::Array(regions) = data else { return Err(WordstatError::BadResponse{ reason: "Data field does not contain an array" }) };
 
     parse_data(&regions)
 }
@@ -35,16 +35,16 @@ fn parse_data(data: &Vec<Value>) -> Result<Vec<Region>, WordstatError> {
 }
 
 fn parse_region(reg: &Value) -> Result<Region, WordstatError> {
-    let Some(name_val) = reg.get("RegionName") else { return Err(WordstatError::BadResponse) };
-    let Value::String(name) = name_val else { return Err(WordstatError::BadResponse) };
-    let Some(parent_id_val) = reg.get("ParentID") else { return Err(WordstatError::BadResponse) };
+    let Some(name_val) = reg.get("RegionName") else { return Err(WordstatError::BadResponse{ reason: "No RegionName field" }) };
+    let Value::String(name) = name_val else { return Err(WordstatError::BadResponse{ reason: "RegionName field is not a string" }) };
+    let Some(parent_id_val) = reg.get("ParentID") else { return Err(WordstatError::BadResponse{ reason: "No ParentID field" }) };
     let parent_id: Option<i64> = match parent_id_val {
         Value::Null => { None }
         Value::Number(num) => { Some(num.as_i64().unwrap()) } // Unsafe but unlikely to panic
-        _ => { return Err(WordstatError::BadResponse); }
+        _ => { return Err(WordstatError::BadResponse{ reason: "ParentID field is not null and not a number" }); }
     };
-    let Some(id_val) = reg.get("RegionID") else { return Err(WordstatError::BadResponse) };
-    let Some(id) = id_val.as_i64() else { return Err(WordstatError::BadResponse) };
+    let Some(id_val) = reg.get("RegionID") else { return Err(WordstatError::BadResponse{ reason: "No RegionID field" }) };
+    let Some(id) = id_val.as_i64() else { return Err(WordstatError::BadResponse{ reason: "RegionID is not an integer" }) };
 
     Ok(Region {
         name: name.clone(),

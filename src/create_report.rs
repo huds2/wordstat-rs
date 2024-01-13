@@ -38,9 +38,9 @@ pub async fn create_report(client: &Client, request: &ReportRequest) -> Result<i
 
     check_status(&result)?;
 
-    let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse) };
-    let Value::Number(report_id) = data else { return Err(WordstatError::BadResponse) };
-    if !report_id.is_i64() { return Err(WordstatError::BadResponse) }
+    let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse{ reason: "Data field not found in response" }) };
+    let Value::Number(report_id) = data else { return Err(WordstatError::BadResponse{ reason: "Data field is not a number" }) };
+    if !report_id.is_i64() { return Err(WordstatError::BadResponse{ reason: "Data field is not an integer" }) }
 
     Ok(report_id.as_i64().unwrap() as i64)
 }

@@ -16,7 +16,7 @@ use custom_error::custom_error;
 use serde_json::Value;
 
 custom_error!{pub WordstatError
-    BadResponse                                     = "Response had bad structure",
+    BadResponse{reason: &'static str}               = "Response had bad structure",
     UnknownResponseCode{code:i64}                   = "Unknown response code recieved: {code}",
     UnknownError                                    = "Unknown error has occured",
     ReportDoesNotExist                              = "The specified report does not exist",        // code 24, 91
@@ -27,12 +27,13 @@ custom_error!{pub WordstatError
     AccessDenied                                    = "Access to Yandex Direct API has been denied",// code 58
     InternalServerError                             = "Internal server error",                      // code 500
     InvalidRequest                                  = "The request was invalid",                    // code 501
-    ReportNotReady                                  = "The report is not ready yet"                 // code 74, 92
+    ReportNotReady                                  = "The report is not ready yet",                // code 74, 92
+    InvalidRequestParameters                        = "The reqeust parameters were invalid"         // code 71
 }
 
 fn check_status(response: &Value) -> Result<(), WordstatError> {
     let Some(error_code_val) = response.get("error_code") else { return Ok(()) };
-    let Some(error_code) = error_code_val.as_i64() else { return Err(WordstatError::BadResponse) };
+    let Some(error_code) = error_code_val.as_i64() else { return Err(WordstatError::BadResponse{ reason: "No error code returned" } ) };
 
     match error_code {
         24 | 91     => { Err(WordstatError::ReportDoesNotExist) }
@@ -44,6 +45,7 @@ fn check_status(response: &Value) -> Result<(), WordstatError> {
         500         => { Err(WordstatError::InternalServerError) }
         501         => { Err(WordstatError::InvalidRequest) }
         74 | 92     => { Err(WordstatError::ReportNotReady) }
+        71          => { Err(WordstatError::InvalidRequestParameters) }
         _           => { Err(WordstatError::UnknownResponseCode { code: error_code }) }
     }
 }

@@ -27,8 +27,8 @@ pub async fn get_report(client: &Client, report_id: i64) -> Result<Vec<ReportEnt
 
     check_status(&result)?;
 
-    let Some(data_val) = result.get("data") else { return Err(WordstatError::BadResponse) };
-    let Value::Array(data) = data_val else { return Err(WordstatError::BadResponse) };
+    let Some(data_val) = result.get("data") else { return Err(WordstatError::BadResponse{ reason: "No data field in response" }) };
+    let Value::Array(data) = data_val else { return Err(WordstatError::BadResponse{ reason: "Data field is not an array" }) };
 
     parse_report(&data)
 }
@@ -44,20 +44,21 @@ fn parse_report(data: &Vec<Value>) -> Result<Vec<ReportEntry>, WordstatError> {
 }
 
 fn parse_report_entry(data: &Value) -> Result<ReportEntry, WordstatError> {
-    let Some(phrase_val) = data.get("Phrase") else { return Err(WordstatError::BadResponse) };
-    let Value::String(phrase) = phrase_val else { return Err(WordstatError::BadResponse) };
+    let Some(phrase_val) = data.get("Phrase") else { return Err(WordstatError::BadResponse{ reason: "No Phrase field" }) };
+    let Value::String(phrase) = phrase_val else { return Err(WordstatError::BadResponse{ reason: "Phrase field is not a string" }) };
 
-    let Some(geoid_val) = data.get("GeoID") else { return Err(WordstatError::BadResponse) };
-    let Value::Array(geoid_arr) = geoid_val else { return Err(WordstatError::BadResponse) };
+    let Some(geoid_val) = data.get("GeoID") else { return Err(WordstatError::BadResponse{ reason: "No GeoID field" }) };
+    let Value::Array(geoid_arr) = geoid_val else { return Err(WordstatError::BadResponse{ reason: "GeoID field is not an array" }) };
     let geo_id = parse_geoid(geoid_arr)?;
 
-    let Some(searched_with_val) = data.get("SearchedWith") else { return Err(WordstatError::BadResponse) };
-    let Value::Array(searched_with_arr) = searched_with_val else { return Err(WordstatError::BadResponse) };
+    let Some(searched_with_val) = data.get("SearchedWith") else { return Err(WordstatError::BadResponse{ reason: "No SearchedWith field" }) };
+    let Value::Array(searched_with_arr) = searched_with_val else { return Err(WordstatError::BadResponse{ reason: "SearchedWith field is not an array" }) };
     let searched_with = parse_wordstat_items(searched_with_arr)?;
 
+    // This field is optional and can be absent with less popular keywords
     let searched_also: Vec<WordstatItem>;
     if let Some(searched_also_val) = data.get("SearchedAlso") {
-        let Value::Array(searched_also_arr) = searched_also_val else { return Err(WordstatError::BadResponse) };
+        let Value::Array(searched_also_arr) = searched_also_val else { return Err(WordstatError::BadResponse{ reason: "SearchedAlso field is not an array" }) };
         searched_also = parse_wordstat_items(searched_also_arr)?;
     }
     else {
@@ -76,8 +77,8 @@ fn parse_geoid(data: &Vec<Value>) -> Result<Vec<i64>, WordstatError> {
     let mut geoids: Vec<i64> = vec![];
 
     for item in data {
-        let Value::Number(geoid) = item else { return Err(WordstatError::BadResponse) };
-        if !geoid.is_i64() { return Err(WordstatError::BadResponse) }
+        let Value::Number(geoid) = item else { return Err(WordstatError::BadResponse{ reason: "GeoID is not a number" }) };
+        if !geoid.is_i64() { return Err(WordstatError::BadResponse{ reason: "GeoID is not an integer" }) }
         geoids.push(geoid.as_i64().unwrap())
     }
 
@@ -95,11 +96,11 @@ fn parse_wordstat_items(data: &Vec<Value>) -> Result<Vec<WordstatItem>, Wordstat
 }
 
 fn parse_wordstat_item(data: &Value) -> Result<WordstatItem, WordstatError> {
-    let Some(phrase_val) = data.get("Phrase") else { return Err(WordstatError::BadResponse) };
-    let Value::String(phrase) = phrase_val else { return Err(WordstatError::BadResponse) };
+    let Some(phrase_val) = data.get("Phrase") else { return Err(WordstatError::BadResponse{ reason: "Phrase not found in WordstatItem" }) };
+    let Value::String(phrase) = phrase_val else { return Err(WordstatError::BadResponse{ reason: "Phrase in WordstatItem is not a string" }) };
 
-    let Some(shows_val) = data.get("Shows") else { return Err(WordstatError::BadResponse) };
-    let Some(shows) = shows_val.as_i64() else { return Err(WordstatError::BadResponse) };
+    let Some(shows_val) = data.get("Shows") else { return Err(WordstatError::BadResponse{ reason: "Shows field not found" }) };
+    let Some(shows) = shows_val.as_i64() else { return Err(WordstatError::BadResponse{ reason: "Shows field is not an integer" }) };
 
     Ok(WordstatItem {
         phrase: phrase.clone(),

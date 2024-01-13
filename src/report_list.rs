@@ -26,8 +26,8 @@ pub async fn get_report_list(client: &Client) -> Result<Vec<ReportStatus>, Words
 
     check_status(&result)?;
 
-    let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse) };
-    let Value::Array(reports) = data else { return Err(WordstatError::BadResponse) };
+    let Some(data) = result.get("data") else { return Err(WordstatError::BadResponse{ reason: "No data field in response" }) };
+    let Value::Array(reports) = data else { return Err(WordstatError::BadResponse{ reason: "Data field is not an array" }) };
 
     parse_reports(&reports)
 }
@@ -43,11 +43,11 @@ fn parse_reports(data: &Vec<Value>) -> Result<Vec<ReportStatus>, WordstatError> 
 }
 
 fn parse_report(report: &Value) -> Result<ReportStatus, WordstatError> {
-    let Some(id_val) = report.get("ReportID") else { return Err(WordstatError::BadResponse) };
-    let Some(report_id) = id_val.as_i64() else { return Err(WordstatError::BadResponse) };
+    let Some(id_val) = report.get("ReportID") else { return Err(WordstatError::BadResponse{ reason: "No ReportID field" }) };
+    let Some(report_id) = id_val.as_i64() else { return Err(WordstatError::BadResponse{ reason: "ReportID field is not an integer" }) };
 
-    let Some(status_val) = report.get("StatusReport") else { return Err(WordstatError::BadResponse) };
-    let Value::String(status_str) = status_val else { return Err(WordstatError::BadResponse) };
+    let Some(status_val) = report.get("StatusReport") else { return Err(WordstatError::BadResponse{ reason: "No StatusReport field" }) };
+    let Value::String(status_str) = status_val else { return Err(WordstatError::BadResponse{ reason: "StatusReport field is not a string" }) };
     let status = match status_str.as_str() {
         "Done"      => { StatusCode::Done }
         "Pending"   => { StatusCode::Pending }
