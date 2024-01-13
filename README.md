@@ -40,4 +40,4 @@ delete_report(&client, report_id).await.unwrap();
 - [X] Getting reports list
 - [X] Getting regions list
 - [X] Cover the methods with tests
-- [ ] Documentation
+- [X] Documentation
